@@ -1,21 +1,33 @@
 #!/usr/bin/python
 import sys, threading, time
+import drop_privs
 from bluserve_library import daemon_function
+
+#define our events
+redraw_event = threading.Event()
+#reselect_event = threading.Event()
+daemon_function_event = threading.Event()
+
+#do we run a server?
+SERVER=True
+if "--no-server" in sys.argv:
+	SERVER=False
+if SERVER == True:
+	import server
+	server = server.Server(daemon_function_event, "localhost", 8080)
+	server_thread = threading.Thread(target=server.start, name="server_thread")
+	server_thread.daemon = True
+	server_thread.start()
+
+drop_privs.drop_privileges()
+
 
 #do we run a GUI?
 GUI=True
 if "--no-gui" in sys.argv:
 	GUI=False
 
-#do we run a server?
-SERVER=True
-if "--no-server" in sys.argv:
-	SERVER=False
 
-#define our events
-redraw_event = threading.Event()
-#reselect_event = threading.Event()
-daemon_function_event = threading.Event()
 
 from bluserve_register import registerer_thread
 rt = registerer_thread(redraw_event)
@@ -41,12 +53,6 @@ if GUI == True:
 	reselect_event_handler_thread.daemon = True
 	reselect_event_handler_thread.start()
 
-if SERVER == True:
-	import server
-	server = server.Server(daemon_function_event)
-	server_thread = threading.Thread(target=server.start, name="server_thread")
-	server_thread.daemon = True
-	server_thread.start()
 
 #handle daemon function!!!
 
@@ -59,11 +65,10 @@ dfeh = threading.Thread(target=daemon_function_event_handler, name="daemon_funct
 dfeh.daemon=True
 dfeh.start()
 
-while 1: continue
 
 
 #work on this later
-"""
+print "begin looper"
 df_timer=10.0
 def daemon_function_looper(df_timer):
 	while True:
@@ -72,9 +77,9 @@ def daemon_function_looper(df_timer):
 			daemon_function_event.clear()
 			df_timer=10
 		time.sleep(.1)
-		#df_timer = df_timer-0.1
+		df_timer = df_timer-0.1
 		print df_timer
-df=threading.Thread(target=daemon_function_looper, name="daemon_function_event_looper")
+df=threading.Thread(target=daemon_function_looper, name="daemon_function_event_looper",args=[df_timer])
 df.daemon=True
-#df.start()
-"""
+df.start()
+while 1: continue

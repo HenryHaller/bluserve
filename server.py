@@ -30,7 +30,7 @@ server = bottle.Bottle()
 
 
 class Server:
-    def __init__(self, daemon_function_event, host='localhost', port=8080):
+    def __init__(self, daemon_function_event, host, port):
         self._host = host
         self._port = port
 	self.daemon_function_event = daemon_function_event
