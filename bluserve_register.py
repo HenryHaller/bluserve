@@ -21,14 +21,10 @@ class registerer_thread(threading.Thread):
 		devices = self.adapter.ListDevices(dbus_interface='org.bluez.Adapter')
 		devices_list = map(lambda x: x[-17:].replace('_',':'), map(str, devices))
 		for device in devices_list:
-			new_devices_found=False
 			if db.has_key(device)==False:
 				print "adding "+device+" to state database"
 				db[device] = "standby"
 				db.sync()
-				new_devices_found=True
-			if new_devices_found:
 				self.new_devices_event.set()
 				self.new_devices_event.clear()
-
 

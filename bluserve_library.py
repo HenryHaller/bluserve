@@ -71,7 +71,7 @@ def disconnect_audioSource(address):
         return False
 
 def authorize_device(address):
-    print "authorizing " + address
+    #print "authorizing " + address
     #what relevant modules are there...
     device_modules = [] # should only be 1
     loopback_modules = [] # should only be 0 or 1
@@ -118,7 +118,7 @@ def authorize_device(address):
     return True
 
 def standby_device(address):
-    print "putting on standby " + address
+    #print "putting on standby " + address
     device_modules = []
     for module in subprocess.check_output("pactl list modules", shell=True).split('\n\n'):
         if module.split('\n\t')[1][6:] == "module-bluetooth-device" and address.replace(':', '_') in module:

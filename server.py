@@ -14,41 +14,62 @@ def gen_list():
     return list
 
 end_html = "<input type='submit'></form></body></html>"
-@bottle.get('/get_html')
-def get_html_state():
-    
-    return begin_html+ gen_list() + end_html
-@bottle.get('/get_json')
-def get_json_state():
-    return json.dumps(state.get_state_database())
-
-def generateAddressFunction(address=None, action=None):
-    if action == "authorize":
-            def addressFunction():
-                    db = state.get_state_database()
-                    for a in db:
-                           standby_device(a)
-                           db[a] = 'standby'
-                    authorize_device(address)
-                    db[address] = action
-                    db.sync()
-                    print "got address", address, "to authorize"
-    if action == "standby":
-            def addressFunction():
-                    standby_device(address)
-                    db = state.get_state_database()
-                    db[address] = action
-                    db.sync()
-                    print "got address", address, "to standby"
-    return addressFunction
 
 
-@bottle.post('/set_state')
-def set_state():
-    print bottle.request.forms.get('device_address')
-    generateAddressFunction(address=bottle.request.forms.get('device_address'), action="authorize")()
-    bluserve_library.daemon_function()
-    return get_html_state()
 
-bottle.run(host='192.168.2.25', port=13341, debug=True, reloader=True)
 
+
+
+"""
+server = bottle.Bottle()
+
+
+#bottle.run(host='192.168.2.25', port=13341, debug=True, reloader=True)
+
+"""
+
+
+class Server:
+    def __init__(self, daemon_function_event, host='localhost', port=8080):
+        self._host = host
+        self._port = port
+	self.daemon_function_event = daemon_function_event
+        self._app = bottle.Bottle()
+        self._route()
+
+    def _route(self):
+        self._app.route('/', method="GET", callback=self.get_html_state)
+        self._app.route('/get_json', method="GET", callback=self.get_json_state)
+        self._app.route('/set_state', method="POST", callback=self.set_state)
+#        self._app.route('/hello/<name>', callback=self._hello)
+#@server.get('/get_html')
+
+    def get_html_state(self):
+        return begin_html+ gen_list() + end_html
+#@server.get('/get_json')
+
+    def get_json_state(self):
+        return json.dumps(state.get_state_database())
+
+    def AddressFunction(self, address=None):
+        db = state.get_state_database()
+        for a in db: db[a] = 'standby'
+        db[address] = 'authorize'
+        db.sync()
+
+    def set_state(self):
+        print "received remote request to authorize "+bottle.request.forms.get('device_address')
+        self.AddressFunction(address=bottle.request.forms.get('device_address'))
+	self.daemon_function_event.set()
+	self.daemon_function_event.clear()
+        return self.get_html_state()
+
+    def start(self):
+        self._app.run(host=self._host, port=self._port)
+
+
+#    def _hello(self, name="Guest"):
+#       return template('Hello {{name}}, how are you?', name=name)
+
+#server = Server(host='localhost', port=8090)
+#server.start()

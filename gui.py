@@ -7,9 +7,10 @@ import threading
 import Tkinter
 import threading
 class bluserve_tk(threading.Thread):
-    def __init__(self):
+    def __init__(self, daemon_function_event):
         threading.Thread.__init__(self)
 	self.daemon = True
+	self.daemon_function_event = daemon_function_event
         self.start()
     def generateAddressFunction(self, address=None, action=None):
 	if action == "authorize":
@@ -18,20 +19,28 @@ class bluserve_tk(threading.Thread):
 			for a in db:
 				standby_device(a)
 				db[a] = 'standby'
-			authorize_device(address)
 			db[address] = action
 			db.sync()
 			self.refreshWidgets()
-			print "got address", address, "to authorize"
+			#print "got address", address, "to authorize"
+			#authorize_device(address)
+			self.daemon_function_event.set()
+			self.daemon_function_event.clear()
 	if action == "standby":
 		def addressFunction():
-			standby_device(address)
 			db = state.get_state_database()
 			db[address] = action
 			db.sync()
 			self.refreshWidgets()
-			print "got address", address, "to standby"
+			#print "got address", address, "to standby"
+			#standby_device(address)
+			self.daemon_function_event.set()
+			self.daemon_function_event.clear()
 	return addressFunction
+    def reselect(self):
+	for widget in self.addressWidgets:
+		for address_status in state.get_state_database().items():
+			if address_status[1] == "authorize" and address_status[0] == widget["text"]: widget.select()
     def regenerateRadioWidgets(self):
 	for address_status in state.get_state_database().items():
 		widget = Radiobutton(self.root, variable = self.active_device, value = address_status[0])
