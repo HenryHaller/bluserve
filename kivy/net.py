@@ -1,5 +1,4 @@
 import json, urllib
-import httplib2
 HOST="192.168.2.25"
 PORT=8080
 

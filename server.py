@@ -59,9 +59,10 @@ class Server:
 
     def set_state(self):
         print "received remote request to authorize "+bottle.request.forms.get('device_address')
-        self.AddressFunction(address=bottle.request.forms.get('device_address'))
-	self.daemon_function_event.set()
-	self.daemon_function_event.clear()
+	if len(bottle.request.forms.get('device_address')) == 17:
+	        self.AddressFunction(address=bottle.request.forms.get('device_address'))
+		self.daemon_function_event.set()
+		self.daemon_function_event.clear()
         return self.get_html_state()
 
     def start(self):

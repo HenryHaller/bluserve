@@ -78,7 +78,7 @@ def daemon_function_looper(df_timer):
 			df_timer=10
 		time.sleep(.1)
 		df_timer = df_timer-0.1
-		print df_timer
+		#print df_timer
 df=threading.Thread(target=daemon_function_looper, name="daemon_function_event_looper",args=[df_timer])
 df.daemon=True
 df.start()
