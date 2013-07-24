@@ -14,7 +14,7 @@ if "--no-server" in sys.argv:
 	SERVER=False
 if SERVER == True:
 	import server
-	server = server.Server(daemon_function_event, "localhost", 8080)
+	server = server.Server(daemon_function_event, "0.0.0.0", 8080)
 	server_thread = threading.Thread(target=server.start, name="server_thread")
 	server_thread.daemon = True
 	server_thread.start()
