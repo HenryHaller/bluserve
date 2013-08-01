@@ -27,12 +27,9 @@ GUI=True
 if "--no-gui" in sys.argv:
 	GUI=False
 
-
-
 from bluserve_register import registerer_thread
 rt = registerer_thread(redraw_event)
 print "started registerer thread?"
-
 
 if GUI == True:
 	import gui
@@ -48,6 +45,7 @@ if GUI == True:
 	def reselect_event_handler():
 		while 1:
 			daemon_function_event.wait()
+			sys.stderr.write("got daemon_function_event in reselector thread\n")
 			app.reselect()
 	reselect_event_handler_thread = threading.Thread(target=reselect_event_handler, name="reselector_thread")
 	reselect_event_handler_thread.daemon = True
@@ -61,6 +59,7 @@ def daemon_function_event_handler():
 		daemon_function_event.wait()
 		#df_timer=10
 		daemon_function()
+		print
 dfeh = threading.Thread(target=daemon_function_event_handler, name="daemon_function_event_handler")
 dfeh.daemon=True
 dfeh.start()

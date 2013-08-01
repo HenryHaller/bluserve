@@ -7,14 +7,14 @@ def get_device(address):
     try:
         device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
     except:
-        sys.stderr.write( "no device path for "+address)
-        sys.stderr.write( "error "+ str(sys.exc_info()[0]))
+        sys.stderr.write( "no device path for "+address+"\n")
+        sys.stderr.write( "error "+ str(sys.exc_info()[0])+"\n")
         return False
     try:
         device_object = bus.get_object('org.bluez', device_path)
         return device_object
     except:
-	sys.stderr.write( "error getting device_object for "+address)
+	sys.stderr.write( "error getting device_object for "+address+"\n")
 	return False
 
 def get_alias(address):
@@ -28,18 +28,18 @@ def connect_audioSource(address):
     try:
         device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
     except:
-        sys.stderr.write( "no device path for "+address)
-        sys.stderr.write( "error "+ str(sys.exc_info()[0]))
+        sys.stderr.write( "no device path for "+address+"\n")
+        sys.stderr.write( "error "+ str(sys.exc_info()[0])+"\n")
         return False
     try:
         device_object = bus.get_object('org.bluez', device_path)
         properties = device_object.GetProperties(dbus_interface="org.bluez.AudioSource")
-        sys.stderr.write( address+" is "+properties['State'])
+        sys.stderr.write( address+" is "+properties['State']+"\n")
         if properties['State'] in ['connected', 'playing', 'connecting']: return True
-        sys.stderr.write( device_object.Connect(dbus_interface="org.bluez.AudioSource"))
+        sys.stderr.write( device_object.Connect(dbus_interface="org.bluez.AudioSource")+"\n")
         return True
     except:
-        sys.stderr.write( "error calling Connect() to %s..." % address)
+        sys.stderr.write( "error calling Connect() to %s..." % address + "\n")
         return False
 
 def disconnect_audioSource(address):
@@ -62,7 +62,7 @@ def disconnect_audioSource(address):
         sys.stderr.write( "could not get properties")
         return False
     try:
-        sys.stderr.write( address+" is "+properties['State'])
+        sys.stderr.write( address+" is "+properties['State']+ "\n")
         if properties['State'] in ['disconnected']: return True
         sys.stderr.write( device_object.Disconnect(dbus_interface="org.bluez.AudioSource"))
         return True
@@ -87,16 +87,16 @@ def authorize_device(address):
 	# is there a device module?
 	if len(device_modules) == 0:
             try:
-		sys.stderr.write( "about to call connect_audioSource ")
+		sys.stderr.write( "about to call connect_audioSource \n")
                 if connect_audioSource(address) == False: return False
             except:
                 sys.stderr.write( "caught an error trying to AudioSource.Connect() to " + address)
             try:
                 device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
             except:
-                sys.stderr.write( "had an error trying to find a device for address " + address)
-                sys.stderr.write( "device_address is " + address)
-                sys.stderr.write( "cannot continue successfully unless bluez sees the device")
+                sys.stderr.write( "had an error trying to find a device for address " + address+"\n")
+                sys.stderr.write( "device_address is " + address+"\n")
+                sys.stderr.write( "cannot continue successfully unless bluez sees the device \n")
                 return
             #command = "pactl load-module module-bluetooth-device address=%s path=%s profile=a2dp_source auto_connect=no" % (address, device_path)
             #try:
@@ -111,10 +111,10 @@ def authorize_device(address):
             sink = sinks_info[0].split("\t")[1]
             source = "bluez_source." + address.replace(':', '_')
             command = "pactl load-module module-loopback source_dont_move=yes source=%s sink=%s" % (source, sink)
-            sys.stderr.write( "connecting", source, "to", sink)
+            sys.stderr.write( "connecting"+ source+ "to"+ sink+"\n")
             subprocess.check_output(command, shell=True)
         except:
-            sys.stderr.write( "failed to create a loopback module for " + address)
+            sys.stderr.write( "failed to create a loopback module for " + address +"\n")
     return True
 
 def standby_device(address):
@@ -133,10 +133,10 @@ def reject_device(address):
 #unload modules and disconnect as sink
 
 def daemon_function():
-    sys.stderr.write( "executing daemon_function")
+    #sys.stderr.write( "executing daemon_function\n")
     modules = subprocess.check_output("pactl list modules", shell=True).split('\n\n')
     db = state.get_state_database()
-    sys.stderr.write( "handling " + str(db.keys()))
+    sys.stderr.write( str(db)+"\n")
     for address in db:
         if db[address] == 'authorize':
             if authorize_device(address) == False:
@@ -145,3 +145,4 @@ def daemon_function():
             standby_device(address)
         if db[address] == 'reject':
             reject_device(address)
+    print

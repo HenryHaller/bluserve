@@ -6,6 +6,7 @@ import time
 import threading
 import Tkinter
 import threading
+import sys
 class bluserve_tk(threading.Thread):
     def __init__(self, daemon_function_event):
         threading.Thread.__init__(self)
@@ -38,9 +39,10 @@ class bluserve_tk(threading.Thread):
 			self.daemon_function_event.clear()
 	return addressFunction
     def reselect(self):
+	sys.stderr.write("reselect function has been called\n")
 	for widget in self.addressWidgets:
 		for address_status in state.get_state_database().items():
-			if address_status[1] == "authorize" and address_status[0] == widget["text"]: widget.select()
+			if address_status[1] == "authorize" and get_alias(address_status[0]) == widget["text"]: widget.select()
     def regenerateRadioWidgets(self):
 	for address_status in state.get_state_database().items():
 		widget = Radiobutton(self.root, variable = self.active_device, value = address_status[0])
