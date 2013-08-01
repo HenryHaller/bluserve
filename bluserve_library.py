@@ -125,11 +125,11 @@ def standby_device(address):
             module_index = module.split('\n\t')[0][8:]
             command = "pactl unload-module " + module_index
             try: subprocess.check_output(command, shell=True)
-            except: sys.stderr.write( "error unloading module "+module_index
+            except: sys.stderr.write( "error unloading module "+module_index)
     disconnect_audioSource(address)
 
 def reject_device(address):
-    sys.stderr.write( "rejecting " + address
+    sys.stderr.write( "rejecting " + address)
 #unload modules and disconnect as sink
 
 def daemon_function():
@@ -140,7 +140,7 @@ def daemon_function():
     for address in db:
         if db[address] == 'authorize':
             if authorize_device(address) == False:
-                sys.stderr.write( "authorizing %s failed" % address
+                sys.stderr.write( "authorizing %s failed" % address)
         if db[address] == 'standby':
             standby_device(address)
         if db[address] == 'reject':
