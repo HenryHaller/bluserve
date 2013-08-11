@@ -1,6 +1,5 @@
 #!/usr/bin/python
 import sys, threading, time
-import drop_privs
 from bluserve_library import daemon_function
 
 #define our events
@@ -19,7 +18,6 @@ if SERVER == True:
 	server_thread.daemon = True
 	server_thread.start()
 
-drop_privs.drop_privileges()
 
 
 #do we run a GUI?
