@@ -146,7 +146,7 @@ def daemon_function():
     for address in db:
         if db[address] == 'authorize':
             if authorize_device(address) == False:
-                sys.stderr.write( "authorizing %s failed" % address)
+                sys.stderr.write( "authorizing %s failed\n" % address)
         if db[address] == 'standby':
             standby_device(address)
         if db[address] == 'reject':

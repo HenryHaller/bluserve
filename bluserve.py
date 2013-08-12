@@ -2,6 +2,12 @@
 import sys, threading, time
 from bluserve_library import daemon_function
 
+
+#do daemon_function
+if "--reload" in sys.argv:
+	daemon_function()
+	sys.exit()
+
 #define our events
 redraw_event = threading.Event()
 #reselect_event = threading.Event()
@@ -17,6 +23,7 @@ if SERVER == True:
 	server_thread = threading.Thread(target=server.start, name="server_thread")
 	server_thread.daemon = True
 	server_thread.start()
+
 
 
 
