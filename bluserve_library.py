@@ -1,7 +1,13 @@
 #!/usr/bin/python
-import state, time, subprocess, dbus, sys
+import state, time, subprocess, dbus, sys, traceback
 bus = dbus.SystemBus()
 adapter = bus.get_object('org.bluez', bus.get_object('org.bluez', '/').DefaultAdapter(dbus_interface='org.bluez.Manager'))
+
+def connect_device(address):
+    try:
+        subprocess.check_output("rfcomm connect hci0 "+address)
+    except:
+        print traceback.format_exc()
 
 def get_device(address):
     try:
@@ -9,7 +15,7 @@ def get_device(address):
     except:
         sys.stderr.write( "no device path for "+address+"\n")
         sys.stderr.write( "error "+ str(sys.exc_info()[0])+"\n")
-        return False
+        connect_device(address)
     try:
         device_object = bus.get_object('org.bluez', device_path)
         return device_object
