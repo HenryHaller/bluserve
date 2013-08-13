@@ -56,6 +56,7 @@ if GUI == True:
 	reselect_event_handler_thread.daemon = True
 	reselect_event_handler_thread.start()
 
+"""
 
 #handle daemon function!!!
 
@@ -68,7 +69,6 @@ def daemon_function_event_handler():
 dfeh = threading.Thread(target=daemon_function_event_handler, name="daemon_function_event_handler")
 dfeh.daemon=True
 dfeh.start()
-
 
 
 #work on this later
@@ -86,4 +86,5 @@ def daemon_function_looper(df_timer):
 df=threading.Thread(target=daemon_function_looper, name="daemon_function_event_looper",args=[df_timer])
 df.daemon=True
 df.start()
+"""
 while 1: continue

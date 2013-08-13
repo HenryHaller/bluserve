@@ -5,7 +5,10 @@ adapter = bus.get_object('org.bluez', bus.get_object('org.bluez', '/').DefaultAd
 
 def connect_device(address):
     try:
-        subprocess.check_output("rfcomm connect hci0 "+address)
+        command = "rfcomm connect hci0 "+ address 
+        print command
+	print "executing connect device"
+        print subprocess.check_output(command, shell=True)
     except:
         print traceback.format_exc()
 
@@ -14,8 +17,8 @@ def get_device(address):
         device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
     except:
         sys.stderr.write( "no device path for "+address+"\n")
-        sys.stderr.write( "error "+ str(sys.exc_info()[0])+"\n")
-        connect_device(address)
+        sys.stderr.write( "error "+ traceback.format_exc() +"\n")
+	return False
     try:
         device_object = bus.get_object('org.bluez', device_path)
         return device_object
@@ -28,6 +31,22 @@ def get_alias(address):
 	if device_object != False: return device_object.GetProperties(dbus_interface="org.bluez.Device")["Alias"]
 	else: return False
 
+def connect_Device(address):
+    try:
+        device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
+    except:
+        device_path = adapter.CreateDevice(address, dbus_interface='org.bluez.Adapter')
+    try:
+        device_object = bus.get_object('org.bluez', device_path)
+        properties = device_object.GetProperties(dbus_interface="org.bluez.AudioSource")
+        if properties['State'] in ['connected', 'playing', 'connecting']: return True
+        device_object.Connect(dbus_interface="org.bluez.AudioSource")
+        return True
+    except:
+        print "error calling Connect to "+address
+        return False
+
+"""
 def connect_audioSource(address):
     bus = dbus.SystemBus()
     adapter = bus.get_object('org.bluez', bus.get_object('org.bluez', '/').DefaultAdapter(dbus_interface='org.bluez.Manager'))
@@ -47,6 +66,7 @@ def connect_audioSource(address):
     except:
         sys.stderr.write( "error calling Connect() to %s..." % address + "\n")
         return False
+"""
 
 def disconnect_audioSource(address):
     bus = dbus.SystemBus()
@@ -94,9 +114,9 @@ def authorize_device(address):
 	if len(device_modules) == 0:
             try:
 		sys.stderr.write( "about to call connect_audioSource \n")
-                if connect_audioSource(address) == False: return False
+                if connect_Device(address) == False: return False
             except:
-                sys.stderr.write( "caught an error trying to AudioSource.Connect() to " + address)
+                sys.stderr.write( "caught an error trying to AudioSource.Connect() to " + address + "\n")
             try:
                 device_path = adapter.FindDevice(address, dbus_interface='org.bluez.Adapter')
             except:
