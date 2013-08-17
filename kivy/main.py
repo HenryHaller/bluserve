@@ -22,9 +22,9 @@ class Layout(GridLayout):
 	try:
 		db = net.get_database_from_server()
 		for address in db:
-			if db[address] == "authorize": btn = ToggleButton(text=address, group="device_addresses", state="down")
+			if db[address] == "authorize": btn = ToggleButton(text=net.get_alias_for_address(address), group="device_addresses", state="down")
 			else:
-				btn = ToggleButton(text=address, group="device_addresses")
+				btn = ToggleButton(text=net.get_alias_for_address(address), group="device_addresses")
 				btn.bind(on_press=self.refresh)
 			self.widgets.append(btn)
 		map(self.add_widget, self.widgets)

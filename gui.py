@@ -46,7 +46,7 @@ class bluserve_tk(threading.Thread):
     def regenerateRadioWidgets(self):
 	for address_status in state.get_state_database().items():
 		widget = Radiobutton(self.root, variable = self.active_device, value = address_status[0])
-		if get_alias(address_status[0]) == False: widget["text"] = address_status[0]
+		widget["text"] = get_alias(address_status[0])
 		else: widget["text"] = unicode(get_alias(address_status[0]))
 		if address_status[1] == 'authorize':
 			widget.select()

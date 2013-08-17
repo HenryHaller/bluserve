@@ -29,7 +29,7 @@ def get_device(address):
 def get_alias(address):
 	device_object = get_device(address)
 	if device_object != False: return device_object.GetProperties(dbus_interface="org.bluez.Device")["Alias"]
-	else: return False
+	else: return address
 
 def connect_Device(address):
     try:
@@ -103,10 +103,8 @@ def authorize_device(address):
     loopback_modules = [] # should only be 0 or 1
     for module in subprocess.check_output("pactl list modules", shell=True).split('\n\n'):
 	if module.split('\n\t')[1][6:] == "module-bluetooth-device" and address.replace(':', '_') in module:
-            #sys.stderr.write( module
             device_modules.append(module)
         if module.split('\n\t')[1][6:] == "module-loopback" and address.replace(':', '_') in module:
-            #sys.stderr.write( module
             loopback_modules.append(module)
     if len(loopback_modules) == 0:
         #no loop back module... 
@@ -141,6 +139,10 @@ def authorize_device(address):
             subprocess.check_output(command, shell=True)
         except:
             sys.stderr.write( "failed to create a loopback module for " + address +"\n")
+    if len(loopback_modules) > 1:
+	offending_module_index = loopback_modules[0].split('\n')[0][8:]
+	command = "pactl unload-module " + offending_module_index
+	print subprocess.check_output(command, shell=True)
     return True
 
 def standby_device(address):

@@ -3,31 +3,24 @@ from bluserve_library import standby_device, authorize_device
 begin_html = "<html><head></head><body><form action='./set_state' method='POST'>"
 
 def gen_li(address_action):
-    if address_action[1] != 'authorize': input = "<input type='radio' name='device_address' value='%s'>" % address_action[0] +address_action[0]
-    else: input = "<input type='radio' name='device_address' value='%s' checked>" % address_action[0] + address_action[0]
-    return input + "<br/>"
+    if address_action[1] != 'authorize':
+	input = "<li class='input'><input type='radio' name='device_address' value='%s' id='%s'>" % (address_action[0], address_action[0])
+        input += "<label for='%s'>" % address_action[0] +  bluserve_library.get_alias(address_action[0]) + "</label>"
+    else:
+	input = "<li class='input selected'><input type='radio' name='device_address' value='%s' id='%s' checked>" % (address_action[0], address_action[0])
+        input += "<label for='%s'>" % address_action[0] +  bluserve_library.get_alias(address_action[0]) + "</label>"
+    return input + "</li>"
 
 def gen_list():
     db = state.get_state_database()
     list = ""
     for item in db.items(): list = list + gen_li(item)
-    return list
+    return "<ul id='choices_list'>" + list + "</ul>"
 
 end_html = "<input type='submit'></form></body></html>"
 
-
-
-
-
-
-"""
-server = bottle.Bottle()
-
-
-#bottle.run(host='192.168.2.25', port=13341, debug=True, reloader=True)
-
-"""
-
+BASE_CSS_FILE = "/home/pi/bluserve/static/base.css"
+TEMPLATE_HTML_FILE = "/home/pi/bluserve/templates/home.html"
 
 class Server:
     def __init__(self, daemon_function_event, host, port):
@@ -41,17 +34,24 @@ class Server:
         self._app.route('/', method="GET", callback=self.get_html_state)
         self._app.route('/get_json', method="GET", callback=self.get_json_state)
         self._app.route('/set_state', method="POST", callback=self.set_state)
-#        self._app.route('/hello/<name>', callback=self._hello)
-#@server.get('/get_html')
+	self._app.route('/static/base.css', method="GET", callback=self.base_css)
+	self._app.route('/get_alias_for_address', method="POST", callback=self.get_alias_for_addres)
+
+    def base_css(self):
+	return open(BASE_CSS_FILE).read()
 
     def get_html_state(self):
-        return begin_html+ gen_list() + end_html
-#@server.get('/get_json')
+        return bottle.template(open(TEMPLATE_HTML_FILE).read(), form_items_html=gen_list())
 
     def get_json_state(self):
         return json.dumps(state.get_state_database())
 
-    def AddressFunction(self, address=None):
+    def get_alias_for_addres(self):
+	if len(bottle.request.forms.get('device_address')) == 17:
+		alias = bluserve_library.get_alias(bottle.request.forms.get('device_address'))
+		return alias
+
+    def AddressFunction(self, address=None): #saves change of state
         db = state.get_state_database()
         for a in db: db[a] = 'standby'
         db[address] = 'authorize'
@@ -69,8 +69,3 @@ class Server:
         self._app.run(host=self._host, port=self._port)
 
 
-#    def _hello(self, name="Guest"):
-#       return template('Hello {{name}}, how are you?', name=name)
-
-#server = Server(host='localhost', port=8090)
-#server.start()

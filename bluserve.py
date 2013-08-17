@@ -18,7 +18,8 @@ SERVER=True
 if "--no-server" in sys.argv:
 	SERVER=False
 if SERVER == True:
-	import server
+	import server, datetime
+	open("/var/tmp/bluserve/serverlog", 'a').write("starting server " + str(datetime.datetime.now().time()) + "\n")
 	server = server.Server(daemon_function_event, "0.0.0.0", 8080)
 	server_thread = threading.Thread(target=server.start, name="server_thread")
 	server_thread.daemon = True
@@ -56,35 +57,4 @@ if GUI == True:
 	reselect_event_handler_thread.daemon = True
 	reselect_event_handler_thread.start()
 
-"""
-
-#handle daemon function!!!
-
-def daemon_function_event_handler():
-	while 1:
-		daemon_function_event.wait()
-		#df_timer=10
-		daemon_function()
-		print
-dfeh = threading.Thread(target=daemon_function_event_handler, name="daemon_function_event_handler")
-dfeh.daemon=True
-dfeh.start()
-
-
-#work on this later
-print "begin looper"
-df_timer=10.0
-def daemon_function_looper(df_timer):
-	while True:
-		if df_timer<0:
-			daemon_function_event.set()
-			daemon_function_event.clear()
-			df_timer=10
-		time.sleep(.1)
-		df_timer = df_timer-0.1
-		#print df_timer
-df=threading.Thread(target=daemon_function_looper, name="daemon_function_event_looper",args=[df_timer])
-df.daemon=True
-df.start()
-"""
 while 1: continue
